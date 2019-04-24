@@ -1,0 +1,21 @@
+{
+  "name": "rabbit/aop",
+  "description": "rabbit aop",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "albert",
+      "email": "63851587@qq.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.1.0",
+    "goaop/framework": "^2.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "rabbit\\aop\\": "src/"
+    }
+  }
+}
