@@ -11,5 +11,4 @@ namespace rabbit\aop;
 class AopAspectKernel extends AbstractAopKernel
 {
 
-
 }
