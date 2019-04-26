@@ -12,9 +12,9 @@ use Go\Instrument\PathResolver;
 use Go\Instrument\Transformer\CachingTransformer;
 use Go\Instrument\Transformer\ConstructorExecutionTransformer;
 use Go\Instrument\Transformer\FilterInjectorTransformer;
-use Go\Instrument\Transformer\MagicConstantTransformer;
 use Go\Instrument\Transformer\SelfValueTransformer;
 use Go\Instrument\Transformer\WeavingTransformer;
+use rabbit\aop\Transformers\MagicConstantTransformer;
 use rabbit\aop\Transformers\MemCacheTransformer;
 use rabbit\helper\ArrayHelper;
 
@@ -93,12 +93,6 @@ abstract class AbstractAopKernel extends AspectKernel
             }
             $aspectContainer = $aspectKernel->getContainer();
             $transformers[] = new SelfValueTransformer($aspectKernel);
-            $transformers[] = new WeavingTransformer(
-                $aspectKernel,
-                $aspectContainer->get('aspect.advice_matcher'),
-                $cacheManager,
-                $aspectContainer->get('aspect.cached.loader')
-            );
             $transformers[] = $magicTransformer;
 
             return $transformers;
