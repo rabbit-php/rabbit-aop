@@ -15,7 +15,7 @@ use PhpParser\NodeTraverser;
  * Class MagicConstantTransformer
  * @package rabbit\aop\Transformers
  */
-class MagicConstantTransformer extends \Go\Instrument\Transformer\MagicConstantTransformer
+class MemMagicConstantTransformer extends \Go\Instrument\Transformer\MagicConstantTransformer
 {
     /**
      * @param StreamMetaData $metadata
@@ -28,6 +28,28 @@ class MagicConstantTransformer extends \Go\Instrument\Transformer\MagicConstantT
 
         // We should always vote abstain, because if there is only changes for magic constants, we can drop them
         return self::RESULT_ABSTAIN;
+    }
+
+    /**
+     * @param StreamMetaData $metadata
+     */
+    private function replaceMagicDirFileConstants(StreamMetaData $metadata)
+    {
+        $magicConstFinder = new NodeFinderVisitor([Dir::class, File::class]);
+        $traverser = new NodeTraverser();
+        $traverser->addVisitor($magicConstFinder);
+        $traverser->traverse($metadata->syntaxTree);
+
+        /** @var MagicConst[] $magicConstants */
+        $magicConstants = $magicConstFinder->getFoundNodes();
+        $magicFileValue = $metadata->uri;
+        $magicDirValue = dirname($magicFileValue);
+        foreach ($magicConstants as $magicConstantNode) {
+            $tokenPosition = $magicConstantNode->getAttribute('startTokenPos');
+            $replacement = $magicConstantNode instanceof Dir ? $magicDirValue : $magicFileValue;
+
+            $metadata->tokenStream[$tokenPosition][1] = "'{$replacement}'";
+        }
     }
 
     /**
@@ -52,28 +74,6 @@ class MagicConstantTransformer extends \Go\Instrument\Transformer\MagicConstantT
 
             $metadata->tokenStream[$startPosition][1] = $expressionPrefix . $metadata->tokenStream[$startPosition][1];
             $metadata->tokenStream[$endPosition][1] .= ')';
-        }
-    }
-
-    /**
-     * @param StreamMetaData $metadata
-     */
-    private function replaceMagicDirFileConstants(StreamMetaData $metadata)
-    {
-        $magicConstFinder = new NodeFinderVisitor([Dir::class, File::class]);
-        $traverser = new NodeTraverser();
-        $traverser->addVisitor($magicConstFinder);
-        $traverser->traverse($metadata->syntaxTree);
-
-        /** @var MagicConst[] $magicConstants */
-        $magicConstants = $magicConstFinder->getFoundNodes();
-        $magicFileValue = $metadata->uri;
-        $magicDirValue = dirname($magicFileValue);
-        foreach ($magicConstants as $magicConstantNode) {
-            $tokenPosition = $magicConstantNode->getAttribute('startTokenPos');
-            $replacement = $magicConstantNode instanceof Dir ? $magicDirValue : $magicFileValue;
-
-            $metadata->tokenStream[$tokenPosition][1] = "'{$replacement}'";
         }
     }
 }

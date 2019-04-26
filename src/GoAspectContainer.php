@@ -10,7 +10,6 @@ use Go\Aop\Pointcut\PointcutLexer;
 use Go\Aop\Pointcut\PointcutParser;
 use Go\Core\AdviceMatcher;
 use Go\Core\AspectLoader;
-use Go\Core\CachedAspectLoader;
 use Go\Core\Container;
 use Go\Core\GeneralAspectLoaderExtension;
 use Go\Core\IntroductionAspectExtension;
@@ -46,7 +45,7 @@ class GoAspectContainer extends \Go\Core\GoAspectContainer
         $this->share('aspect.cached.loader', function (Container $container) {
             $options = $container->get('kernel.options');
             if (!empty($options['cacheDir'])) {
-                $loader = new CachedAspectLoader(
+                $loader = new MemCachedAspectLoader(
                     $container,
                     'aspect.loader',
                     $container->get('kernel.options')

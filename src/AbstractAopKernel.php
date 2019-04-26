@@ -12,10 +12,12 @@ use Go\Instrument\PathResolver;
 use Go\Instrument\Transformer\CachingTransformer;
 use Go\Instrument\Transformer\ConstructorExecutionTransformer;
 use Go\Instrument\Transformer\FilterInjectorTransformer;
+use Go\Instrument\Transformer\MagicConstantTransformer;
 use Go\Instrument\Transformer\SelfValueTransformer;
 use Go\Instrument\Transformer\WeavingTransformer;
-use rabbit\aop\Transformers\MagicConstantTransformer;
 use rabbit\aop\Transformers\MemCacheTransformer;
+use rabbit\aop\Transformers\MemMagicConstantTransformer;
+use rabbit\aop\Transformers\MemWeavingTransformer;
 use rabbit\helper\ArrayHelper;
 
 /**
@@ -80,7 +82,7 @@ abstract class AbstractAopKernel extends AspectKernel
     {
         $cacheManager = $this->getContainer()->get('aspect.cache.path.manager');
         $filterInjector = new FilterInjectorTransformer($this, SourceTransformingLoader::getId(), $cacheManager);
-        $magicTransformer = new MagicConstantTransformer($this);
+        $magicTransformer = !empty($this->options['cacheDir']) ? new MagicConstantTransformer($this) : new MemMagicConstantTransformer($this);
         $aspectKernel = $this;
 
         $sourceTransformers = function () use ($filterInjector, $magicTransformer, $aspectKernel, $cacheManager) {
@@ -93,6 +95,14 @@ abstract class AbstractAopKernel extends AspectKernel
             }
             $aspectContainer = $aspectKernel->getContainer();
             $transformers[] = new SelfValueTransformer($aspectKernel);
+            $transformers[] = !empty($this->options['cacheDir']) ? new WeavingTransformer(
+                $aspectKernel,
+                $aspectContainer->get('aspect.advice_matcher'),
+                $cacheManager,
+                $aspectContainer->get('aspect.cached.loader')
+            ) : new MemWeavingTransformer($aspectKernel,
+                $aspectContainer->get('aspect.advice_matcher'),
+                $aspectContainer->get('aspect.cached.loader'));
             $transformers[] = $magicTransformer;
 
             return $transformers;
