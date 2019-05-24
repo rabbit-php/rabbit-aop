@@ -77,15 +77,6 @@ class GoAspectContainer extends \Go\Core\GoAspectContainer
             if (!empty($options['annotationCache'])) {
                 return $options['annotationCache'];
             }
-
-            if (!empty($options['cacheDir'])) {
-                return new DoctrineCache\FilesystemCache(
-                    $options['cacheDir'] . DIRECTORY_SEPARATOR . '_annotations' . DIRECTORY_SEPARATOR,
-                    '.annotations.cache',
-                    0777 & (~$options['cacheFileMode'])
-                );
-            }
-
             return new DoctrineCache\ArrayCache();
         });
 
@@ -98,10 +89,6 @@ class GoAspectContainer extends \Go\Core\GoAspectContainer
                 $container->get('aspect.annotation.cache'),
                 $options['debug']
             );
-        });
-
-        $this->share('aspect.cache.path.manager', function (Container $container) {
-            return new MemCacheManager($container->get('kernel'));
         });
 
         // Pointcut services

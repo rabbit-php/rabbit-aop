@@ -8,7 +8,6 @@ use Go\Core\AspectKernel;
 use Go\Instrument\Transformer\BaseSourceTransformer;
 use Go\Instrument\Transformer\SourceTransformer;
 use Go\Instrument\Transformer\StreamMetaData;
-use rabbit\aop\MemCacheManager;
 
 class MemCacheTransformer extends BaseSourceTransformer
 {
@@ -18,24 +17,13 @@ class MemCacheTransformer extends BaseSourceTransformer
     protected $transformers = [];
 
     /**
-     * @var MemCacheManager|null
-     */
-    protected $cacheManager;
-    /**
-     * @var array
-     */
-    protected $cacheArray = [];
-
-    /**
      * MemCacheTransformer constructor.
      * @param AspectKernel $kernel
      * @param $transformers
-     * @param MemCacheManager $cacheManager
      */
-    public function __construct(AspectKernel $kernel, $transformers, MemCacheManager $cacheManager)
+    public function __construct(AspectKernel $kernel, $transformers)
     {
         parent::__construct($kernel);
-        $this->cacheManager = $cacheManager;
         $this->transformers = $transformers;
     }
 
@@ -47,35 +35,7 @@ class MemCacheTransformer extends BaseSourceTransformer
      */
     public function transform(StreamMetaData $metadata)
     {
-        $originalUri = $metadata->uri;
-        $processingResult = self::RESULT_ABSTAIN;
-        $cacheUri = $this->cacheManager->getCachePathForResource($originalUri);
-
-        // Guard to disable overwriting of original files
-        if ($cacheUri === $originalUri) {
-            return self::RESULT_ABORTED;
-        }
-
-        $cacheState = $this->cacheManager->queryCacheState($originalUri);
-        $cacheModified = $cacheState ? $cacheState['filemtime'] : 0;
-
-        if ((isset($cacheState['cacheUri']) && $cacheState['cacheUri'] !== $cacheUri)
-            || !$this->container->isFresh($cacheModified)
-        ) {
-            $processingResult = $this->processTransformers($metadata);
-            $this->cacheManager->setCacheState($originalUri, [
-                'filemtime' => time(),
-                'cacheUri' => ($processingResult === self::RESULT_TRANSFORMED) ? $cacheUri : null
-            ]);
-
-            return $processingResult;
-        }
-
-        if ($cacheState) {
-            $processingResult = isset($cacheState['cacheUri']) ? self::RESULT_TRANSFORMED : self::RESULT_ABORTED;
-        }
-
-        return $processingResult;
+        return $this->processTransformers($metadata);
     }
 
     /**

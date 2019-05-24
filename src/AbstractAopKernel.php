@@ -9,16 +9,13 @@ use Go\Core\AspectContainer;
 use Go\Core\AspectKernel;
 use Go\Instrument\ClassLoading\SourceTransformingLoader;
 use Go\Instrument\PathResolver;
-use Go\Instrument\Transformer\CachingTransformer;
 use Go\Instrument\Transformer\ConstructorExecutionTransformer;
-use Go\Instrument\Transformer\FilterInjectorTransformer;
-use Go\Instrument\Transformer\MagicConstantTransformer;
 use Go\Instrument\Transformer\SelfValueTransformer;
-use Go\Instrument\Transformer\WeavingTransformer;
+use rabbit\aop\Transformers\FilterInjectorTransformer;
 use rabbit\aop\Transformers\MemCacheTransformer;
 use rabbit\aop\Transformers\MemMagicConstantTransformer;
 use rabbit\aop\Transformers\MemWeavingTransformer;
-use rabbit\helper\ArrayHelper;
+use rabbit\helper\CoroHelper;
 
 /**
  * Class AbstractAopKernel
@@ -51,6 +48,41 @@ abstract class AbstractAopKernel extends AspectKernel
         }
     }
 
+    public function init(array $options = [])
+    {
+        if ($this->wasInitialized) {
+            return;
+        }
+
+        $this->options = $this->normalizeOptions($options);
+        define('AOP_ROOT_DIR', $this->options['appDir']);
+        define('AOP_CACHE_DIR', $this->options['cacheDir']);
+
+        /** @var AspectContainer $container */
+        $container = $this->container = new $this->options['containerClass'];
+        $container->set('kernel', $this);
+        $container->set('kernel.interceptFunctions', $this->hasFeature(Features::INTERCEPT_FUNCTIONS));
+        $container->set('kernel.options', $this->options);
+
+        SourceTransformingLoader::register();
+
+        foreach ($this->registerTransformers() as $sourceTransformer) {
+            SourceTransformingLoader::addTransformer($sourceTransformer);
+        }
+
+        // Register kernel resources in the container for debug mode
+        if ($this->options['debug']) {
+            $this->addKernelResourcesToContainer($container);
+        }
+
+        AopComposerLoader::init($this->options, $container);
+
+        // Register all AOP configuration in the container
+        $this->configureAop($container);
+
+        $this->wasInitialized = true;
+    }
+
     /**
      * @param array $options
      * @return array
@@ -59,16 +91,8 @@ abstract class AbstractAopKernel extends AspectKernel
     {
         $options = array_replace($this->getDefaultOptions(), $options);
 
-        if (ArrayHelper::getValue($options, 'cacheDir') !== null) {
-            $options['cacheDir'] = PathResolver::realpath($options['cacheDir']);
-            if (!$options['cacheDir']) {
-                $options['excludePaths'][] = $options['cacheDir'];
-            }
-        }
-
         $options['excludePaths'][] = __DIR__ . '/../';
         $options['appDir'] = PathResolver::realpath($options['appDir']);
-        $options['cacheFileMode'] = (int)$options['cacheFileMode'];
         $options['includePaths'] = PathResolver::realpath($options['includePaths']);
         $options['excludePaths'] = PathResolver::realpath($options['excludePaths']);
 
@@ -80,12 +104,11 @@ abstract class AbstractAopKernel extends AspectKernel
      */
     protected function registerTransformers()
     {
-        $cacheManager = $this->getContainer()->get('aspect.cache.path.manager');
-        $filterInjector = new FilterInjectorTransformer($this, SourceTransformingLoader::getId(), $cacheManager);
-        $magicTransformer = !empty($this->options['cacheDir']) ? new MagicConstantTransformer($this) : new MemMagicConstantTransformer($this);
+        $filterInjector = new FilterInjectorTransformer($this, SourceTransformingLoader::getId());
+        $magicTransformer = new MemMagicConstantTransformer($this);
         $aspectKernel = $this;
 
-        $sourceTransformers = function () use ($filterInjector, $magicTransformer, $aspectKernel, $cacheManager) {
+        $sourceTransformers = function () use ($filterInjector, $magicTransformer, $aspectKernel) {
             $transformers = [];
             if ($aspectKernel->hasFeature(Features::INTERCEPT_INITIALIZATIONS)) {
                 $transformers[] = new ConstructorExecutionTransformer();
@@ -95,12 +118,7 @@ abstract class AbstractAopKernel extends AspectKernel
             }
             $aspectContainer = $aspectKernel->getContainer();
             $transformers[] = new SelfValueTransformer($aspectKernel);
-            $transformers[] = !empty($this->options['cacheDir']) ? new WeavingTransformer(
-                $aspectKernel,
-                $aspectContainer->get('aspect.advice_matcher'),
-                $cacheManager,
-                $aspectContainer->get('aspect.cached.loader')
-            ) : new MemWeavingTransformer($aspectKernel,
+            $transformers[] = new MemWeavingTransformer($aspectKernel,
                 $aspectContainer->get('aspect.advice_matcher'),
                 $aspectContainer->get('aspect.cached.loader'));
             $transformers[] = $magicTransformer;
@@ -108,8 +126,19 @@ abstract class AbstractAopKernel extends AspectKernel
             return $transformers;
         };
 
-        return [
-            AOP_CACHE_DIR ? new CachingTransformer($this, $sourceTransformers, $cacheManager) : new MemCacheTransformer($this, $sourceTransformers, $cacheManager)
-        ];
+        return [new MemCacheTransformer($this, $sourceTransformers)];
+    }
+
+    /**
+     * @param AspectContainer $container
+     */
+    protected function addKernelResourcesToContainer(AspectContainer $container)
+    {
+        $trace = CoroHelper::getId() === -1 ? debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS,
+            2) : \Co::getBackTrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $refClass = new \ReflectionObject($this);
+
+        $container->addResource($trace[1]['file']);
+        $container->addResource($refClass->getFileName());
     }
 }
