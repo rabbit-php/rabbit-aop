@@ -38,16 +38,6 @@ abstract class AbstractAopKernel extends AspectKernel
         return $this;
     }
 
-    /**
-     * @param AspectContainer $container
-     */
-    protected function configureAop(AspectContainer $container)
-    {
-        foreach ($this->aspects as $aspect) {
-            $container->registerAspect($aspect);
-        }
-    }
-
     public function init(array $options = [])
     {
         if ($this->wasInitialized) {
@@ -56,7 +46,6 @@ abstract class AbstractAopKernel extends AspectKernel
 
         $this->options = $this->normalizeOptions($options);
         define('AOP_ROOT_DIR', $this->options['appDir']);
-        define('AOP_CACHE_DIR', $this->options['cacheDir']);
 
         /** @var AspectContainer $container */
         $container = $this->container = new $this->options['containerClass'];
@@ -91,6 +80,7 @@ abstract class AbstractAopKernel extends AspectKernel
     {
         $options = array_replace($this->getDefaultOptions(), $options);
 
+        $options['excludePaths'][] = __DIR__ . '/../../../goaop/';
         $options['excludePaths'][] = __DIR__ . '/../';
         $options['appDir'] = PathResolver::realpath($options['appDir']);
         $options['includePaths'] = PathResolver::realpath($options['includePaths']);
@@ -140,5 +130,15 @@ abstract class AbstractAopKernel extends AspectKernel
 
         $container->addResource($trace[1]['file']);
         $container->addResource($refClass->getFileName());
+    }
+
+    /**
+     * @param AspectContainer $container
+     */
+    protected function configureAop(AspectContainer $container)
+    {
+        foreach ($this->aspects as $aspect) {
+            $container->registerAspect($aspect);
+        }
     }
 }

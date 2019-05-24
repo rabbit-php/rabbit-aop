@@ -48,8 +48,7 @@ class MemWeavingTransformer extends BaseSourceTransformer
         AspectKernel $kernel,
         AdviceMatcher $adviceMatcher,
         AspectLoader $loader
-    )
-    {
+    ) {
         parent::__construct($kernel);
         $this->adviceMatcher = $adviceMatcher;
         $this->aspectLoader = $loader;
@@ -169,8 +168,7 @@ class MemWeavingTransformer extends BaseSourceTransformer
         array $advices,
         StreamMetaData $streamMetaData,
         $newClassName
-    )
-    {
+    ) {
         $classNode = $class->getNode();
         $position = $classNode->getAttribute('startTokenPos');
         do {

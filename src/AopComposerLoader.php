@@ -6,7 +6,6 @@ namespace rabbit\aop;
 use Composer\Autoload\ClassLoader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Go\Core\AspectContainer;
-use Go\Instrument\FileSystem\Enumerator;
 use Go\Instrument\PathResolver;
 use rabbit\aop\Transformers\FilterInjectorTransformer;
 
@@ -27,10 +26,10 @@ class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
      */
     public function __construct(ClassLoader $original, AspectContainer $container, array $options = [])
     {
-        $this->options  = $options;
+        $this->options = $options;
         $this->original = $original;
 
-        $prefixes     = $original->getPrefixes();
+        $prefixes = $original->getPrefixes();
         $excludePaths = $options['excludePaths'];
 
         if (!empty($prefixes)) {
@@ -43,7 +42,7 @@ class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
             }
         }
 
-        $fileEnumerator       = new Enumerator($options['appDir'], $options['includePaths'], $excludePaths);
+        $fileEnumerator = new Enumerator($options['appDir'], $options['includePaths'], $excludePaths);
         $this->fileEnumerator = $fileEnumerator;
     }
 
@@ -80,6 +79,23 @@ class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
         return self::$wasInitialized;
     }
 
+    public static function wasInitialized()
+    {
+        return self::$wasInitialized;
+    }
+
+    /**
+     * @param string $class
+     */
+    public function loadClass($class)
+    {
+        $file = $this->findFile($class);
+
+        if ($file !== false) {
+            include $file;
+        }
+    }
+
     /**
      * @param string $class
      * @return false|string
@@ -103,10 +119,5 @@ class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
         }
 
         return $file;
-    }
-
-    public static function wasInitialized()
-    {
-        return self::$wasInitialized;
     }
 }
