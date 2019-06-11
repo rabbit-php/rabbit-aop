@@ -3,9 +3,9 @@
 
 namespace rabbit\aop;
 
-use php_user_filter as PhpStreamFilter;
-use Go\Instrument\Transformer\StreamMetaData;
 use Go\Instrument\Transformer\SourceTransformer;
+use Go\Instrument\Transformer\StreamMetaData;
+use php_user_filter as PhpStreamFilter;
 
 /**
  * Class SourceTransformingLoader
@@ -66,8 +66,8 @@ class SourceTransformingLoader extends PhpStreamFilter
     /**
      * Returns the name of registered filter
      *
-     * @throws \RuntimeException if filter was not registered
      * @return string
+     * @throws \RuntimeException if filter was not registered
      */
     public static function getId()
     {
@@ -87,7 +87,7 @@ class SourceTransformingLoader extends PhpStreamFilter
      */
     public function filter($in, $out, &$consumed, $closing)
     {
-        \Swoole\Runtime::enableCoroutine(false);
+        \Swoole\Runtime::enableCoroutine(true, SWOOLE_HOOK_ALL ^ SWOOLE_HOOK_FILE);
         while ($bucket = stream_bucket_make_writeable($in)) {
             $this->data .= $bucket->data;
         }
@@ -101,7 +101,7 @@ class SourceTransformingLoader extends PhpStreamFilter
 
             $bucket = stream_bucket_new($this->stream, $metadata->source);
             stream_bucket_append($out, $bucket);
-            \Swoole\Runtime::enableCoroutine(true);
+            \Swoole\Runtime::enableCoroutine(true, SWOOLE_HOOK_ALL);
             return PSFS_PASS_ON;
         }
 
