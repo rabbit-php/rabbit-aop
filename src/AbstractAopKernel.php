@@ -14,7 +14,6 @@ use rabbit\aop\Transformers\FilterInjectorTransformer;
 use rabbit\aop\Transformers\MemCacheTransformer;
 use rabbit\aop\Transformers\MemMagicConstantTransformer;
 use rabbit\aop\Transformers\MemWeavingTransformer;
-use rabbit\helper\CoroHelper;
 
 /**
  * Class AbstractAopKernel
@@ -123,8 +122,9 @@ abstract class AbstractAopKernel extends AspectKernel
      */
     protected function addKernelResourcesToContainer(AspectContainer $container)
     {
-        $trace = CoroHelper::getId() === -1 ? debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS,
-            2) : \Co::getBackTrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $cid = \Co::getuid();
+        $trace = $cid === -1 ? debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS,
+            2) : \Co::getBackTrace($cid, DEBUG_BACKTRACE_IGNORE_ARGS, 2);
         $refClass = new \ReflectionObject($this);
 
         $container->addResource($trace[1]['file']);
