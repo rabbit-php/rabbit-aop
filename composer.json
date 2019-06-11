@@ -11,6 +11,7 @@
   ],
   "require": {
     "php": ">=7.1.0",
+    "rabbit/framework": "~0.1",
     "goaop/framework": "^2.3"
   },
   "autoload": {
