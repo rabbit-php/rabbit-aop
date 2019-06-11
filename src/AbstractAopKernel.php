@@ -7,7 +7,6 @@ namespace rabbit\aop;
 use Go\Aop\Features;
 use Go\Core\AspectContainer;
 use Go\Core\AspectKernel;
-use Go\Instrument\ClassLoading\SourceTransformingLoader;
 use Go\Instrument\PathResolver;
 use Go\Instrument\Transformer\ConstructorExecutionTransformer;
 use Go\Instrument\Transformer\SelfValueTransformer;
