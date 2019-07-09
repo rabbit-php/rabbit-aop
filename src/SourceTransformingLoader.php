@@ -87,7 +87,6 @@ class SourceTransformingLoader extends PhpStreamFilter
      */
     public function filter($in, $out, &$consumed, $closing)
     {
-        \Swoole\Runtime::enableCoroutine(true, SWOOLE_HOOK_ALL ^ SWOOLE_HOOK_FILE);
         while ($bucket = stream_bucket_make_writeable($in)) {
             $this->data .= $bucket->data;
         }
@@ -101,7 +100,6 @@ class SourceTransformingLoader extends PhpStreamFilter
 
             $bucket = stream_bucket_new($this->stream, $metadata->source);
             stream_bucket_append($out, $bucket);
-            \Swoole\Runtime::enableCoroutine(true, SWOOLE_HOOK_ALL);
             return PSFS_PASS_ON;
         }
 
