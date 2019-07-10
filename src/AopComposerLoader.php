@@ -92,6 +92,15 @@ class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
         $file = $this->findFile($class);
 
         if ($file !== false) {
+            if (strpos($file, 'php://') === 0) {
+                if (preg_match('/resource=(.+)$/', $file, $matches)) {
+                    $file = PathResolver::realpath($matches[1]);
+                }
+                $aopFile = $this->options['cacheDir'] . '/' . $file;
+                if (file_exists($aopFile)) {
+                    $file = $aopFile;
+                }
+            }
             include $file;
         }
     }
@@ -119,5 +128,13 @@ class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
         }
 
         return $file;
+    }
+
+    /**
+     * @return Enumerator
+     */
+    public function getEnumerator(): Enumerator
+    {
+        return $this->fileEnumerator;
     }
 }

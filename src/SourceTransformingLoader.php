@@ -5,13 +5,12 @@ namespace rabbit\aop;
 
 use Go\Instrument\Transformer\SourceTransformer;
 use Go\Instrument\Transformer\StreamMetaData;
-use php_user_filter as PhpStreamFilter;
 
 /**
  * Class SourceTransformingLoader
  * @package rabbit\aop
  */
-class SourceTransformingLoader extends PhpStreamFilter
+class SourceTransformingLoader
 {
     /**
      * Php filter definition
@@ -55,11 +54,6 @@ class SourceTransformingLoader extends PhpStreamFilter
         if (!empty(self::$filterId)) {
             throw new \RuntimeException('Stream filter already registered');
         }
-
-        $result = stream_filter_register($filterId, __CLASS__);
-        if (!$result) {
-            throw new \RuntimeException('Stream filter was not registered');
-        }
         self::$filterId = $filterId;
     }
 
@@ -76,34 +70,6 @@ class SourceTransformingLoader extends PhpStreamFilter
         }
 
         return self::$filterId;
-    }
-
-    /**
-     * @param resource $in
-     * @param resource $out
-     * @param int $consumed
-     * @param bool $closing
-     * @return int
-     */
-    public function filter($in, $out, &$consumed, $closing)
-    {
-        while ($bucket = stream_bucket_make_writeable($in)) {
-            $this->data .= $bucket->data;
-        }
-
-        if ($closing || feof($this->stream)) {
-            $consumed = strlen($this->data);
-
-            // $this->stream contains pointer to the source
-            $metadata = new StreamMetaData($this->stream, $this->data);
-            self::transformCode($metadata);
-
-            $bucket = stream_bucket_new($this->stream, $metadata->source);
-            stream_bucket_append($out, $bucket);
-            return PSFS_PASS_ON;
-        }
-
-        return PSFS_FEED_ME;
     }
 
     /**
