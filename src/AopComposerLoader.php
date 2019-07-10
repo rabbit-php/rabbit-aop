@@ -101,7 +101,7 @@ class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
                     $file = $aopFile;
                 }
             }
-            include $file;
+            include_once $file;
         }
     }
 

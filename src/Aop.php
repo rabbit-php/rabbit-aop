@@ -60,6 +60,9 @@ class Aop
                                 if (!$len) {
                                     new \InvalidArgumentException("Unable to write file: {$cacheDir}");
                                 }
+                                include_once $cacheDir;
+                            } else {
+                                include_once $file;
                             }
                         }
                     }
