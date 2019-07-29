@@ -27,13 +27,13 @@ class Aop
             $options['cacheDir'] = sys_get_temp_dir();
         }
         $kernel->init($options);
-        $this->init($options['cacheDir']);
+        $this->bootStrap($options['cacheDir']);
     }
 
     /**
      *
      */
-    private function init(string $cacheDir): void
+    private function bootStrap(string $cacheDir): void
     {
         $loaders = spl_autoload_functions();
         foreach ($loaders as $loader) {
