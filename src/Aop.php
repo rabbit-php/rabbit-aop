@@ -39,27 +39,29 @@ class Aop
         foreach ($loaders as $loader) {
             foreach ($loader as $item) {
                 if ($item instanceof AopComposerLoader) {
-                    foreach ($item->getEnumerator()->enumerate() as $file) {
-                        $class = $this->getClassByFile($file);
-                        if (!empty($class)) {
-                            $aopFile = $item->findFile($class);
-                            if (strpos($aopFile, 'php://') === 0) {
-                                if (($fp = fopen($file, 'r')) === false) {
-                                    throw new \InvalidArgumentException("Unable to open file: {$fileName}");
-                                }
-                                $context = fread($fp, filesize($file));
-                                $metadata = new StreamMetaData($fp, $context);
-                                fclose($fp);
-                                SourceTransformingLoader::transformCode($metadata);
-                                $context = $metadata->source;
-                                $aopClass = $this->getClassByString($context);
-                                if (strpos($aopClass, '__AopProxied') !== false) {
-                                    $dir = $cacheDir . '/' . $file->getPathname();
-                                    FileHelper::createDirectory(dirname($dir), 0777);
-                                    $len = file_put_contents($dir,
-                                        $context);
-                                    if (!$len) {
-                                        new \InvalidArgumentException("Unable to write file: {$dir}");
+                    if ($item->getIncludePath()) {
+                        foreach ($item->getEnumerator()->enumerate() as $file) {
+                            $class = $this->getClassByFile($file);
+                            if (!empty($class)) {
+                                $aopFile = $item->findFile($class);
+                                if (strpos($aopFile, 'php://') === 0) {
+                                    if (($fp = fopen($file, 'r')) === false) {
+                                        throw new \InvalidArgumentException("Unable to open file: {$fileName}");
+                                    }
+                                    $context = fread($fp, filesize($file));
+                                    $metadata = new StreamMetaData($fp, $context);
+                                    fclose($fp);
+                                    SourceTransformingLoader::transformCode($metadata);
+                                    $context = $metadata->source;
+                                    $aopClass = $this->getClassByString($context);
+                                    if (strpos($aopClass, '__AopProxied') !== false) {
+                                        $dir = $cacheDir . '/' . $file->getPathname();
+                                        FileHelper::createDirectory(dirname($dir), 0777);
+                                        $len = file_put_contents($dir,
+                                            $context);
+                                        if (!$len) {
+                                            new \InvalidArgumentException("Unable to write file: {$dir}");
+                                        }
                                     }
                                 }
                             }

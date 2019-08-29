@@ -47,6 +47,14 @@ class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
     }
 
     /**
+     * @return array|null
+     */
+    public function getIncludePath(): ?array
+    {
+        return $this->options['includePaths'];
+    }
+
+    /**
      * @param array $options
      * @param AspectContainer $container
      * @return bool
