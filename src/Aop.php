@@ -55,7 +55,7 @@ class Aop
                                     fclose($fp);
                                     SourceTransformingLoader::transformCode($metadata);
                                     $context = $metadata->source;
-                                    $aopClass = $this->getClassByString($context);
+                                    $aopClass = ClassHelper::getClassByString($context);
                                     if (strpos($aopClass, '__AopProxied') !== false) {
                                         $dir = $cacheDir . '/' . $file->getPathname();
                                         FileHelper::createDirectory(dirname($dir), 0777);
