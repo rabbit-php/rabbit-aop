@@ -3,7 +3,6 @@
 
 namespace rabbit\aop;
 
-
 use Go\Aop\Features;
 use Go\Core\AspectContainer;
 use Go\Core\AspectKernel;
@@ -106,9 +105,11 @@ abstract class AbstractAopKernel extends AspectKernel
             }
             $aspectContainer = $aspectKernel->getContainer();
             $transformers[] = new SelfValueTransformer($aspectKernel);
-            $transformers[] = new MemWeavingTransformer($aspectKernel,
+            $transformers[] = new MemWeavingTransformer(
+                $aspectKernel,
                 $aspectContainer->get('aspect.advice_matcher'),
-                $aspectContainer->get('aspect.cached.loader'));
+                $aspectContainer->get('aspect.cached.loader')
+            );
             $transformers[] = $magicTransformer;
 
             return $transformers;
@@ -123,8 +124,10 @@ abstract class AbstractAopKernel extends AspectKernel
     protected function addKernelResourcesToContainer(AspectContainer $container)
     {
         $cid = \Co::getuid();
-        $trace = $cid === -1 ? debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS,
-            2) : \Co::getBackTrace($cid, DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $trace = $cid === -1 ? debug_backtrace(
+            DEBUG_BACKTRACE_IGNORE_ARGS,
+            2
+        ) : \Co::getBackTrace($cid, DEBUG_BACKTRACE_IGNORE_ARGS, 2);
         $refClass = new \ReflectionObject($this);
 
         $container->addResource($trace[1]['file']);

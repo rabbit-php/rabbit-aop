@@ -3,7 +3,6 @@
 
 namespace rabbit\aop\Transformers;
 
-
 use Go\Core\AspectKernel;
 use Go\Instrument\Transformer\BaseSourceTransformer;
 use Go\Instrument\Transformer\SourceTransformer;

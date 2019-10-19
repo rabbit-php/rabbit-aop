@@ -3,7 +3,6 @@
 
 namespace rabbit\aop;
 
-
 use Go\Core\AspectKernel;
 use Go\Instrument\ClassLoading\CachePathManager;
 

@@ -59,8 +59,10 @@ class Aop
                                     if (strpos($aopClass, '__AopProxied') !== false) {
                                         $dir = $cacheDir . '/' . $file->getPathname();
                                         FileHelper::createDirectory(dirname($dir), 0777);
-                                        $len = file_put_contents($dir,
-                                            $context);
+                                        $len = file_put_contents(
+                                            $dir,
+                                            $context
+                                        );
                                         if (!$len) {
                                             new \InvalidArgumentException("Unable to write file: {$dir}");
                                         }

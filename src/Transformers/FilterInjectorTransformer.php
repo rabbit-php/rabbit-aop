@@ -3,7 +3,6 @@
 
 namespace rabbit\aop\Transformers;
 
-
 use Go\Core\AspectKernel;
 use Go\Instrument\PathResolver;
 use Go\Instrument\Transformer\NodeFinderVisitor;

@@ -3,7 +3,6 @@
 
 namespace rabbit\aop;
 
-
 use Go\Aop\Aspect;
 use Go\Core\AspectContainer;
 use Go\Core\AspectLoader;

@@ -132,7 +132,6 @@ class Enumerator
         $excludePaths = $this->excludePaths;
 
         return function (SplFileInfo $file) use ($rootDirectory, $includePaths, $excludePaths) {
-
             if ($file->getExtension() !== 'php') {
                 return false;
             }
@@ -181,5 +180,4 @@ class Enumerator
     {
         return $file->getRealPath();
     }
-
 }
