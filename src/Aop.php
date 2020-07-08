@@ -41,15 +41,16 @@ class Aop
                 if ($item instanceof AopComposerLoader) {
                     if ($item->getIncludePath()) {
                         foreach ($item->getEnumerator()->enumerate() as $file) {
-                            $contents = file_get_contents($file);
+                            $fileName = $file->getPathname();
+                            $contents = file_get_contents($fileName);
                             $class = $this->getClassByString($contents);
                             if (!empty($class)) {
                                 $aopFile = $item->findFile($class);
-                                if (strpos($aopFile, 'php://') === 0) {
-                                    if (($fp = fopen($file, 'r')) === false) {
+                                if ($aopFile !== false && strpos($aopFile, 'php://') === 0) {
+                                    if (($fp = fopen($fileName, 'r')) === false) {
                                         throw new \InvalidArgumentException("Unable to open file: {$fileName}");
                                     }
-                                    $context = fread($fp, filesize($file));
+                                    $context = fread($fp, filesize($fileName));
                                     $metadata = new StreamMetaData($fp, $context);
                                     fclose($fp);
                                     SourceTransformingLoader::transformCode($metadata);

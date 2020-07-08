@@ -39,7 +39,7 @@ class FilterInjectorTransformer implements SourceTransformer
     /**
      * @var AspectKernel|null
      */
-    protected static ?AspectKernel $kernel;
+    protected static ?AspectKernel $kernel = null;
 
     /**
      * FilterInjectorTransformer constructor.
