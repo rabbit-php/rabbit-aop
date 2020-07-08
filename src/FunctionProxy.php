@@ -1,11 +1,11 @@
 <?php
+declare(strict_types=1);
 
-
-namespace rabbit\aop;
+namespace Rabbit\Aop;
 
 /**
  * Class FunctionProxy
- * @package rabbit\aop
+ * @package Rabbit\Aop
  */
 class FunctionProxy extends \Go\Proxy\FunctionProxy
 {

@@ -1,22 +1,22 @@
 <?php
+declare(strict_types=1);
 
-
-namespace rabbit\aop;
+namespace Rabbit\Aop;
 
 use Composer\Autoload\ClassLoader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Go\Core\AspectContainer;
 use Go\Instrument\PathResolver;
-use rabbit\aop\Transformers\FilterInjectorTransformer;
+use Rabbit\Aop\Transformers\FilterInjectorTransformer;
 
 /**
  * Class AopComposerLoader
- * @package rabbit\aop
+ * @package Rabbit\Aop
  */
 class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
 {
     /** @var bool */
-    private static $wasInitialized = false;
+    private static bool $wasInitialized = false;
 
     /**
      * AopComposerLoader constructor.
@@ -119,10 +119,9 @@ class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
      */
     public function findFile($class)
     {
-        static $isAllowedFilter = null, $isProduction = false;
+        static $isAllowedFilter = null;
         if (!$isAllowedFilter) {
             $isAllowedFilter = $this->fileEnumerator->getFilter();
-            $isProduction = !$this->options['debug'];
         }
 
         $file = $this->original->findFile($class);

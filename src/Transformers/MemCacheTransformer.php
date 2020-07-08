@@ -1,7 +1,7 @@
 <?php
+declare(strict_types=1);
 
-
-namespace rabbit\aop\Transformers;
+namespace Rabbit\Aop\Transformers;
 
 use Go\Core\AspectKernel;
 use Go\Instrument\Transformer\BaseSourceTransformer;
@@ -43,7 +43,7 @@ class MemCacheTransformer extends BaseSourceTransformer
      * @param StreamMetaData $metadata Metadata for source code
      * @return string See RESULT_XXX constants in the interface
      */
-    private function processTransformers(StreamMetaData $metadata)
+    private function processTransformers(StreamMetaData $metadata): string
     {
         $overallResult = self::RESULT_ABSTAIN;
         if (is_callable($this->transformers)) {

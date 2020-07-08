@@ -1,7 +1,7 @@
 <?php
+declare(strict_types=1);
 
-
-namespace rabbit\aop\Transformers;
+namespace Rabbit\Aop\Transformers;
 
 use Go\Aop\Advisor;
 use Go\Aop\Aspect;
@@ -18,11 +18,11 @@ use Go\ParserReflection\ReflectionFileNamespace;
 use Go\ParserReflection\ReflectionMethod;
 use Go\Proxy\ClassProxy;
 use Go\Proxy\TraitProxy;
-use rabbit\aop\FunctionProxy;
+use Rabbit\Aop\FunctionProxy;
 
 /**
- * Class WeavingTransformer
- * @package rabbit\aop\Transformers
+ * Class MemWeavingTransformer
+ * @package Rabbit\Aop\Transformers
  */
 class MemWeavingTransformer extends BaseSourceTransformer
 {
@@ -48,7 +48,8 @@ class MemWeavingTransformer extends BaseSourceTransformer
         AspectKernel $kernel,
         AdviceMatcher $adviceMatcher,
         AspectLoader $loader
-    ) {
+    )
+    {
         parent::__construct($kernel);
         $this->adviceMatcher = $adviceMatcher;
         $this->aspectLoader = $loader;
@@ -98,7 +99,7 @@ class MemWeavingTransformer extends BaseSourceTransformer
      *
      * @param array $unloadedAspects List of unloaded aspects
      */
-    private function loadAndRegisterAspects(array $unloadedAspects)
+    private function loadAndRegisterAspects(array $unloadedAspects): void
     {
         foreach ($unloadedAspects as $unloadedAspect) {
             $this->aspectLoader->loadAndRegister($unloadedAspect);
@@ -114,7 +115,7 @@ class MemWeavingTransformer extends BaseSourceTransformer
      *
      * @return bool True if was class processed, false otherwise
      */
-    private function processSingleClass(array $advisors, StreamMetaData $metadata, ReflectionClass $class)
+    private function processSingleClass(array $advisors, StreamMetaData $metadata, ReflectionClass $class): bool
     {
         $advices = $this->adviceMatcher->getAdvicesForClass($class, $advisors);
 
@@ -167,8 +168,9 @@ class MemWeavingTransformer extends BaseSourceTransformer
         ReflectionClass $class,
         array $advices,
         StreamMetaData $streamMetaData,
-        $newClassName
-    ) {
+        string $newClassName
+    ): void
+    {
         $classNode = $class->getNode();
         $position = $classNode->getAttribute('startTokenPos');
         do {
@@ -217,11 +219,11 @@ class MemWeavingTransformer extends BaseSourceTransformer
      * Save AOP proxy to the separate file anr returns the php source code for inclusion
      *
      * @param ReflectionClass $class Original class reflection
-     * @param string|ClassProxy $child
+     * @param ClassProxy $child
      *
      * @return string
      */
-    private function saveProxyToCache($class, $child)
+    private function saveProxyToCache(ReflectionClass $class, ClassProxy $child): string
     {
         $body = '';
         $namespace = $class->getNamespaceName();
@@ -248,7 +250,7 @@ class MemWeavingTransformer extends BaseSourceTransformer
      *
      * @return boolean True if functions were processed, false otherwise
      */
-    private function processFunctions(array $advisors, StreamMetaData $metadata, ReflectionFileNamespace $namespace)
+    private function processFunctions(array $advisors, StreamMetaData $metadata, ReflectionFileNamespace $namespace): bool
     {
         $wasProcessedFunctions = false;
         $functionAdvices = $this->adviceMatcher->getAdvicesForFunctions($namespace, $advisors);

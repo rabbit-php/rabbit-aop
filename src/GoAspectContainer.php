@@ -1,10 +1,11 @@
 <?php
+declare(strict_types=1);
 
-
-namespace rabbit\aop;
+namespace Rabbit\Aop;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\CachedReader;
+use Doctrine\Common\Cache\ArrayCache;
 use Go\Aop\Pointcut\PointcutGrammar;
 use Go\Aop\Pointcut\PointcutLexer;
 use Go\Aop\Pointcut\PointcutParser;
@@ -17,7 +18,7 @@ use Go\Core\LazyAdvisorAccessor;
 
 /**
  * Class GoAspectContainer
- * @package rabbit\aop
+ * @package Rabbit\Aop
  */
 class GoAspectContainer extends \Go\Core\GoAspectContainer
 {
@@ -46,9 +47,7 @@ class GoAspectContainer extends \Go\Core\GoAspectContainer
             $options = $container->get('kernel.options');
             if (!empty($options['cacheDir'])) {
                 $loader = new MemCachedAspectLoader(
-                    $container,
-                    'aspect.loader',
-                    $container->get('kernel.options')
+                    $container, 'aspect.loader'
                 );
             } else {
                 $loader = $container->get('aspect.loader');
@@ -77,7 +76,7 @@ class GoAspectContainer extends \Go\Core\GoAspectContainer
             if (!empty($options['annotationCache'])) {
                 return $options['annotationCache'];
             }
-            return new DoctrineCache\ArrayCache();
+            return new ArrayCache();
         });
 
         $this->share('aspect.annotation.reader', function (Container $container) {

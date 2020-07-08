@@ -1,7 +1,7 @@
 <?php
+declare(strict_types=1);
 
-
-namespace rabbit\aop\Transformers;
+namespace Rabbit\Aop\Transformers;
 
 use Go\Core\AspectKernel;
 use Go\Instrument\PathResolver;
@@ -13,7 +13,7 @@ use PhpParser\NodeTraverser;
 
 /**
  * Class FilterInjectorTransformer
- * @package rabbit\aop\Transformers
+ * @package Rabbit\Aop\Transformers
  */
 class FilterInjectorTransformer implements SourceTransformer
 {
@@ -27,19 +27,19 @@ class FilterInjectorTransformer implements SourceTransformer
      *
      * @var string
      */
-    protected static $filterName;
+    protected static ?string $filterName = null;
 
     /**
      * Kernel options
      *
      * @var array
      */
-    protected static $options = [];
+    protected static array $options = [];
 
     /**
      * @var AspectKernel|null
      */
-    protected static $kernel;
+    protected static ?AspectKernel $kernel;
 
     /**
      * FilterInjectorTransformer constructor.
@@ -55,7 +55,7 @@ class FilterInjectorTransformer implements SourceTransformer
      * @param AspectKernel $kernel
      * @param $filterName
      */
-    protected static function configure(AspectKernel $kernel, $filterName)
+    protected static function configure(AspectKernel $kernel, string $filterName): void
     {
         if (self::$kernel) {
             throw new \RuntimeException('Filter injector can be configured only once.');
@@ -75,7 +75,7 @@ class FilterInjectorTransformer implements SourceTransformer
      *
      * @return string Transformed path to the resource
      */
-    public static function rewrite($originalResource, $originalDir = '')
+    public static function rewrite(string $originalResource, string $originalDir = ''): string
     {
         static $appDir, $debug;
         if (!$appDir) {
@@ -106,7 +106,7 @@ class FilterInjectorTransformer implements SourceTransformer
      * @param StreamMetaData $metadata Metadata for source
      * @return string See RESULT_XXX constants in the interface
      */
-    public function transform(StreamMetaData $metadata)
+    public function transform(StreamMetaData $metadata): string
     {
         $includeExpressionFinder = new NodeFinderVisitor([Include_::class]);
 

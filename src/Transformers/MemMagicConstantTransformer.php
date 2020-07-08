@@ -1,7 +1,7 @@
 <?php
+declare(strict_types=1);
 
-
-namespace rabbit\aop\Transformers;
+namespace Rabbit\Aop\Transformers;
 
 use Go\Instrument\Transformer\NodeFinderVisitor;
 use Go\Instrument\Transformer\StreamMetaData;
@@ -13,8 +13,8 @@ use PhpParser\Node\Scalar\MagicConst\File;
 use PhpParser\NodeTraverser;
 
 /**
- * Class MagicConstantTransformer
- * @package rabbit\aop\Transformers
+ * Class MemMagicConstantTransformer
+ * @package Rabbit\Aop\Transformers
  */
 class MemMagicConstantTransformer extends \Go\Instrument\Transformer\MagicConstantTransformer
 {

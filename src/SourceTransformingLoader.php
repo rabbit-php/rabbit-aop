@@ -1,10 +1,11 @@
 <?php
+declare(strict_types=1);
 
-
-namespace rabbit\aop;
+namespace Rabbit\Aop;
 
 use Go\Instrument\Transformer\SourceTransformer;
 use Go\Instrument\Transformer\StreamMetaData;
+use RuntimeException;
 
 /**
  * Class SourceTransformingLoader
@@ -27,32 +28,32 @@ class SourceTransformingLoader
      *
      * @var string
      */
-    protected $data = '';
+    protected string $data = '';
 
     /**
      * List of transformers
      *
      * @var array|SourceTransformer[]
      */
-    protected static $transformers = [];
+    protected static array $transformers = [];
 
     /**
      * Identifier of filter
      *
      * @var string
      */
-    protected static $filterId;
+    protected static ?string $filterId = null;
 
     /**
      * Register current loader as stream filter in PHP
      *
      * @param string $filterId Identifier for the filter
-     * @throws \RuntimeException If registration was failed
+     * @throws RuntimeException If registration was failed
      */
-    public static function register($filterId = self::FILTER_IDENTIFIER)
+    public static function register(string $filterId = self::FILTER_IDENTIFIER): void
     {
         if (!empty(self::$filterId)) {
-            throw new \RuntimeException('Stream filter already registered');
+            throw new RuntimeException('Stream filter already registered');
         }
         self::$filterId = $filterId;
     }
@@ -61,12 +62,12 @@ class SourceTransformingLoader
      * Returns the name of registered filter
      *
      * @return string
-     * @throws \RuntimeException if filter was not registered
+     * @throws RuntimeException if filter was not registered
      */
-    public static function getId()
+    public static function getId(): string
     {
         if (empty(self::$filterId)) {
-            throw new \RuntimeException('Stream filter was not registered');
+            throw new RuntimeException('Stream filter was not registered');
         }
 
         return self::$filterId;
@@ -79,7 +80,7 @@ class SourceTransformingLoader
      *
      * @return void
      */
-    public static function addTransformer(SourceTransformer $transformer)
+    public static function addTransformer(SourceTransformer $transformer):void
     {
         self::$transformers[] = $transformer;
     }
@@ -91,7 +92,7 @@ class SourceTransformingLoader
      *
      * @return void
      */
-    public static function transformCode(StreamMetaData $metadata)
+    public static function transformCode(?StreamMetaData $metadata)
     {
         foreach (self::$transformers as $transformer) {
             $result = $transformer->transform($metadata);

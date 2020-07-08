@@ -1,10 +1,12 @@
 <?php
+declare(strict_types=1);
 
-
-namespace rabbit\aop;
+namespace Rabbit\Aop;
 
 use ArrayIterator;
+use Closure;
 use InvalidArgumentException;
+use Iterator;
 use LogicException;
 use SplFileInfo;
 use Symfony\Component\Finder\Finder;
@@ -12,7 +14,7 @@ use UnexpectedValueException;
 
 /**
  * Class Enumerator
- * @package rabbit\aop
+ * @package Rabbit\Aop
  */
 class Enumerator
 {
@@ -22,21 +24,21 @@ class Enumerator
      *
      * @var string
      */
-    private $rootDirectory;
+    private string $rootDirectory;
 
     /**
      * List of additional include paths, should be below rootDirectory
      *
      * @var array
      */
-    private $includePaths;
+    private array $includePaths = [];
 
     /**
      * List of additional exclude paths, should be below rootDirectory
      *
      * @var array
      */
-    private $excludePaths;
+    private array $excludePaths = [];
 
     /**
      * Initializes an enumerator
@@ -45,7 +47,7 @@ class Enumerator
      * @param array $includePaths List of additional include paths
      * @param array $excludePaths List of additional exclude paths
      */
-    public function __construct($rootDirectory, array $includePaths = [], array $excludePaths = [])
+    public function __construct(string $rootDirectory, array $includePaths = [], array $excludePaths = [])
     {
         $this->rootDirectory = $rootDirectory;
         $this->includePaths = $includePaths;
@@ -55,12 +57,12 @@ class Enumerator
     /**
      * Returns an enumerator for files
      *
-     * @return \Iterator|SplFileInfo[]
+     * @return Iterator|SplFileInfo[]
      * @throws UnexpectedValueException
      * @throws InvalidArgumentException
      * @throws LogicException
      */
-    public function enumerate()
+    public function enumerate(): Iterator
     {
         $finder = new Finder();
         $finder->files()
@@ -85,7 +87,7 @@ class Enumerator
      * @return array
      * @throws UnexpectedValueException
      */
-    private function getInPaths()
+    private function getInPaths(): array
     {
         $inPaths = [];
 
@@ -108,7 +110,7 @@ class Enumerator
     /**
      * @return array
      */
-    private function getExcludePaths()
+    private function getExcludePaths(): array
     {
         $excludePaths = [];
 
@@ -123,9 +125,9 @@ class Enumerator
     /**
      * Returns a filter callback for enumerating files
      *
-     * @return \Closure
+     * @return Closure
      */
-    public function getFilter()
+    public function getFilter(): Closure
     {
         $rootDirectory = $this->rootDirectory;
         $includePaths = $this->includePaths;
@@ -176,7 +178,7 @@ class Enumerator
      *
      * @return string
      */
-    protected function getFileFullPath(SplFileInfo $file)
+    protected function getFileFullPath(SplFileInfo $file): string
     {
         return $file->getRealPath();
     }

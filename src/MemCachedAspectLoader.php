@@ -1,17 +1,16 @@
 <?php
+declare(strict_types=1);
 
-
-namespace rabbit\aop;
+namespace Rabbit\Aop;
 
 use Go\Aop\Aspect;
 use Go\Core\AspectContainer;
 use Go\Core\AspectLoader;
 use Go\Core\AspectLoaderExtension;
-use ReflectionClass;
 
 /**
  * Class MemCachedAspectLoader
- * @package rabbit\aop
+ * @package Rabbit\Aop
  */
 class MemCachedAspectLoader extends AspectLoader
 {
@@ -20,16 +19,15 @@ class MemCachedAspectLoader extends AspectLoader
      *
      * @var string
      */
-    protected $loaderId;
+    protected string $loaderId;
 
     /**
      * Cached loader constructor
      *
      * @param AspectContainer $container Instance of container
      * @param string $loaderId Original loader identifier
-     * @param array $options List of kernel options
      */
-    public function __construct(AspectContainer $container, $loaderId, array $options = [])
+    public function __construct(AspectContainer $container, string $loaderId)
     {
         $this->loaderId = $loaderId;
         $this->container = $container;
@@ -40,9 +38,7 @@ class MemCachedAspectLoader extends AspectLoader
      */
     public function load(Aspect $aspect)
     {
-        $refAspect = new ReflectionClass($aspect);
-        $loadedItems = $this->loader->load($aspect);
-        return $loadedItems;
+        return $this->loader->load($aspect);
     }
 
     /**
@@ -54,7 +50,8 @@ class MemCachedAspectLoader extends AspectLoader
     }
 
     /**
-     * {@inheritdoc}
+     * @param $name
+     * @return mixed
      */
     public function __get($name)
     {

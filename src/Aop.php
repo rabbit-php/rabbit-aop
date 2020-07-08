@@ -1,26 +1,26 @@
 <?php
+declare(strict_types=1);
 
+namespace Rabbit\Aop;
 
-namespace rabbit\aop;
-
+use Exception;
 use Go\Instrument\Transformer\StreamMetaData;
 
 /**
  * Class Aop
- * @package rabbit\aop
+ * @package Rabbit\Aop
  */
 class Aop
 {
     /**
      * Aop constructor.
-     * @param string $kernel
      * @param array $aspects
      * @param array $options
+     * @throws Exception
      */
-    public function __construct(string $kernel, array $aspects, array $options)
+    public function __construct(array $aspects, array $options)
     {
-        /** @var AbstractAopKernel kernel */
-        $kernel = $kernel::getInstance();
+        $kernel = AopAspectKernel::getInstance();
         $kernel->setAspects($aspects);
         if (!isset($options['cacheDir'])) {
             $options['cacheDir'] = sys_get_temp_dir();
@@ -30,7 +30,8 @@ class Aop
     }
 
     /**
-     *
+     * @param string $cacheDir
+     * @throws Exception
      */
     private function bootStrap(string $cacheDir): void
     {
@@ -140,7 +141,7 @@ class Aop
      * @param int $mode
      * @param bool $recursive
      * @return bool
-     * @throws \Exception
+     * @throws Exception
      */
     public function createDirectory(string $path, int $mode = 0775, bool $recursive = true): bool
     {
@@ -156,15 +157,15 @@ class Aop
             if (!mkdir($path, $mode)) {
                 return false;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if (!is_dir($path)) {
-                throw new \Exception("Failed to create directory \"$path\": " . $e->getMessage(), $e->getCode(), $e);
+                throw new Exception("Failed to create directory \"$path\": " . $e->getMessage(), $e->getCode(), $e);
             }
         }
         try {
             return chmod($path, $mode);
-        } catch (\Exception $e) {
-            throw new \Exception(
+        } catch (Exception $e) {
+            throw new Exception(
                 "Failed to change permissions for directory \"$path\": " . $e->getMessage(),
                 $e->getCode(),
                 $e
