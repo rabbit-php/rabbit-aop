@@ -1,10 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Rabbit\Aop;
 
 use Exception;
-use Go\Instrument\Transformer\StreamMetaData;
+use InvalidArgumentException;
 
 /**
  * Class Aop
@@ -48,7 +49,7 @@ class Aop
                                 $aopFile = $item->findFile($class);
                                 if ($aopFile !== false && strpos($aopFile, 'php://') === 0) {
                                     if (($fp = fopen($fileName, 'r')) === false) {
-                                        throw new \InvalidArgumentException("Unable to open file: {$fileName}");
+                                        throw new InvalidArgumentException("Unable to open file: {$fileName}");
                                     }
                                     $context = fread($fp, filesize($fileName));
                                     $metadata = new StreamMetaData($fp, $context);
@@ -58,13 +59,13 @@ class Aop
                                     $aopClass = $this->getClassByString($context);
                                     if (strpos($aopClass, '__AopProxied') !== false) {
                                         $dir = $cacheDir . '/' . $file->getPathname();
-                                        $this->createDirectory(dirname($dir), 0777);
+                                        self::createDirectory(dirname($dir), 0777);
                                         $len = file_put_contents(
                                             $dir,
                                             $context
                                         );
                                         if (!$len) {
-                                            new \InvalidArgumentException("Unable to write file: {$dir}");
+                                            new InvalidArgumentException("Unable to write file: {$dir}");
                                         }
                                     }
                                 }
@@ -92,12 +93,12 @@ class Aop
         foreach (token_get_all($contents) as $token) {
 
             //If this token is the namespace declaring, then flag that the next tokens will be the namespace name
-            if (is_array($token) && $token[0] == T_NAMESPACE) {
+            if (is_array($token) && $token[0] === T_NAMESPACE) {
                 $getting_namespace = true;
             }
 
             //If this token is the class declaring, then flag that the next tokens will be the class name
-            if (is_array($token) && $token[0] == T_CLASS) {
+            if (is_array($token) && $token[0] === T_CLASS) {
                 $getting_class = true;
             }
 
@@ -122,7 +123,7 @@ class Aop
             if ($getting_class === true) {
 
                 //If the token is a string, it's the name of the class
-                if (is_array($token) && $token[0] == T_STRING) {
+                if (is_array($token) && $token[0] === T_STRING) {
 
                     //Store the token's value as the class name
                     $class = $token[1];
@@ -144,7 +145,7 @@ class Aop
      * @return bool
      * @throws Exception
      */
-    public function createDirectory(string $path, int $mode = 0775, bool $recursive = true): bool
+    public static function createDirectory(string $path, int $mode = 0775, bool $recursive = true): bool
     {
         if (is_dir($path)) {
             return true;

@@ -1,24 +1,25 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Rabbit\Aop\Transformers;
 
-use Go\Aop\Advisor;
 use Go\Aop\Aspect;
-use Go\Aop\Framework\AbstractJoinpoint;
-use Go\Core\AdviceMatcher;
-use Go\Core\AspectContainer;
-use Go\Core\AspectKernel;
-use Go\Core\AspectLoader;
-use Go\Instrument\Transformer\BaseSourceTransformer;
-use Go\Instrument\Transformer\StreamMetaData;
-use Go\ParserReflection\ReflectionClass;
-use Go\ParserReflection\ReflectionFile;
-use Go\ParserReflection\ReflectionFileNamespace;
-use Go\ParserReflection\ReflectionMethod;
+use Go\Aop\Advisor;
 use Go\Proxy\ClassProxy;
 use Go\Proxy\TraitProxy;
+use Go\Core\AspectKernel;
+use Go\Core\AspectLoader;
+use Go\Core\AdviceMatcher;
+use Go\Core\AspectContainer;
 use Rabbit\Aop\FunctionProxy;
+use Go\Aop\Framework\AbstractJoinpoint;
+use Go\ParserReflection\ReflectionFile;
+use Go\ParserReflection\ReflectionClass;
+use Go\ParserReflection\ReflectionMethod;
+use Go\Instrument\Transformer\StreamMetaData;
+use Go\ParserReflection\ReflectionFileNamespace;
+use Go\Instrument\Transformer\BaseSourceTransformer;
 
 /**
  * Class MemWeavingTransformer
@@ -48,8 +49,7 @@ class MemWeavingTransformer extends BaseSourceTransformer
         AspectKernel $kernel,
         AdviceMatcher $adviceMatcher,
         AspectLoader $loader
-    )
-    {
+    ) {
         parent::__construct($kernel);
         $this->adviceMatcher = $adviceMatcher;
         $this->aspectLoader = $loader;
@@ -83,10 +83,10 @@ class MemWeavingTransformer extends BaseSourceTransformer
                     continue;
                 }
                 $wasClassProcessed = $this->processSingleClass($advisors, $metadata, $class);
-                $totalTransformations += (integer)$wasClassProcessed;
+                $totalTransformations += (int)$wasClassProcessed;
             }
             $wasFunctionsProcessed = $this->processFunctions($advisors, $metadata, $namespace);
-            $totalTransformations += (integer)$wasFunctionsProcessed;
+            $totalTransformations += (int)$wasFunctionsProcessed;
         }
 
         $result = ($totalTransformations > 0) ? self::RESULT_TRANSFORMED : self::RESULT_ABSTAIN;
@@ -169,8 +169,7 @@ class MemWeavingTransformer extends BaseSourceTransformer
         array $advices,
         StreamMetaData $streamMetaData,
         string $newClassName
-    ): void
-    {
+    ): void {
         $classNode = $class->getNode();
         $position = $classNode->getAttribute('startTokenPos');
         do {
@@ -237,7 +236,7 @@ class MemWeavingTransformer extends BaseSourceTransformer
             $body .= "use {$fqdn}{$aliasSuffix};" . PHP_EOL;
         }
 
-        $body .= $child;
+        $body .= (string)$child;
         return $body;
     }
 
