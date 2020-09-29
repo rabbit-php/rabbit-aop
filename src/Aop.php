@@ -6,6 +6,7 @@ namespace Rabbit\Aop;
 
 use Exception;
 use InvalidArgumentException;
+use Rabbit\Base\Helper\FileHelper;
 
 /**
  * Class Aop
@@ -26,6 +27,11 @@ class Aop
         if (!isset($options['cacheDir'])) {
             $options['cacheDir'] = sys_get_temp_dir();
         }
+        $options['cacheDir'] .= '/aop';
+        if (isset($options['auto_clear']) && $options['auto_clear'] === true) {
+            FileHelper::removeDirectory($options['cacheDir']);
+        }
+
         $kernel->init($options);
         $this->bootStrap($options['cacheDir']);
     }
