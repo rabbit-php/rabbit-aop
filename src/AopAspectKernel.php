@@ -1,20 +1,21 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Rabbit\Aop;
 
 use Go\Aop\Features;
-use Go\Core\AspectContainer;
 use Go\Core\AspectKernel;
+use Go\Core\AspectContainer;
 use Go\Instrument\PathResolver;
-use Go\Instrument\Transformer\CachingTransformer;
-use Go\Instrument\Transformer\ConstructorExecutionTransformer;
-use Go\Instrument\Transformer\SelfValueTransformer;
 use Go\Instrument\Transformer\SourceTransformer;
-use Rabbit\Aop\Transformers\FilterInjectorTransformer;
 use Rabbit\Aop\Transformers\MemCacheTransformer;
-use Rabbit\Aop\Transformers\MemMagicConstantTransformer;
+use Go\Instrument\Transformer\CachingTransformer;
 use Rabbit\Aop\Transformers\MemWeavingTransformer;
+use Go\Instrument\Transformer\SelfValueTransformer;
+use Rabbit\Aop\Transformers\FilterInjectorTransformer;
+use Rabbit\Aop\Transformers\MemMagicConstantTransformer;
+use Go\Instrument\Transformer\ConstructorExecutionTransformer;
 
 /**
  * Class AopAspectKernel
@@ -125,11 +126,7 @@ class AopAspectKernel extends AspectKernel
      */
     protected function addKernelResourcesToContainer(AspectContainer $container)
     {
-        $cid = \Co::getuid();
-        $trace = $cid === -1 ? debug_backtrace(
-            DEBUG_BACKTRACE_IGNORE_ARGS,
-            2
-        ) : \Co::getBackTrace($cid, DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $trace =  debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
         $refClass = new \ReflectionObject($this);
 
         $container->addResource($trace[1]['file']);
