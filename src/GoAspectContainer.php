@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Rabbit\Aop;
@@ -13,6 +14,7 @@ use Go\Core\AdviceMatcher;
 use Go\Core\AspectLoader;
 use Go\Core\Container;
 use Go\Core\GeneralAspectLoaderExtension;
+use Go\Core\GoAspectContainer as CoreGoAspectContainer;
 use Go\Core\IntroductionAspectExtension;
 use Go\Core\LazyAdvisorAccessor;
 
@@ -20,7 +22,7 @@ use Go\Core\LazyAdvisorAccessor;
  * Class GoAspectContainer
  * @package Rabbit\Aop
  */
-class GoAspectContainer extends \Go\Core\GoAspectContainer
+class GoAspectContainer extends CoreGoAspectContainer
 {
     /**
      * Constructor for container
@@ -47,7 +49,8 @@ class GoAspectContainer extends \Go\Core\GoAspectContainer
             $options = $container->get('kernel.options');
             if (!empty($options['cacheDir'])) {
                 $loader = new MemCachedAspectLoader(
-                    $container, 'aspect.loader'
+                    $container,
+                    'aspect.loader'
                 );
             } else {
                 $loader = $container->get('aspect.loader');

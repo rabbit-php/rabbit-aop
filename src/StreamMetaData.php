@@ -40,7 +40,7 @@ class StreamMetaData extends TransformerStreamMetaData
         $this->setSource($source);
     }
 
-    private function setSource($newSource)
+    private function setSource(string $newSource): void
     {
         $lexer = new Lexer(['usedAttributes' => [
             'comments',

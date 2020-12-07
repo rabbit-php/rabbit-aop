@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Rabbit\Aop;
@@ -6,6 +7,7 @@ namespace Rabbit\Aop;
 use Composer\Autoload\ClassLoader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Go\Core\AspectContainer;
+use Go\Instrument\ClassLoading\AopComposerLoader as ClassLoadingAopComposerLoader;
 use Go\Instrument\PathResolver;
 use Rabbit\Aop\Transformers\FilterInjectorTransformer;
 
@@ -13,7 +15,7 @@ use Rabbit\Aop\Transformers\FilterInjectorTransformer;
  * Class AopComposerLoader
  * @package Rabbit\Aop
  */
-class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
+class AopComposerLoader extends ClassLoadingAopComposerLoader
 {
     /** @var bool */
     private static bool $wasInitialized = false;
@@ -24,7 +26,7 @@ class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
      * @param AspectContainer $container
      * @param array $options
      */
-    public function __construct(ClassLoader $original, AspectContainer $container, array $options = [])
+    public function __construct(ClassLoader $original, array $options = [])
     {
         $this->options = $options;
         $this->original = $original;
@@ -59,7 +61,7 @@ class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
      * @param AspectContainer $container
      * @return bool
      */
-    public static function init(array $options, AspectContainer $container)
+    public static function init(array $options, AspectContainer $container): bool
     {
         $loaders = spl_autoload_functions();
 
@@ -73,7 +75,7 @@ class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
 
                     return class_exists($class, false);
                 });
-                $loader[0] = new AopComposerLoader($loader[0], $container, $options);
+                $loader[0] = new AopComposerLoader($loader[0], $options);
                 self::$wasInitialized = true;
             }
             spl_autoload_unregister($loaderToUnregister);
@@ -87,7 +89,7 @@ class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
         return self::$wasInitialized;
     }
 
-    public static function wasInitialized()
+    public static function wasInitialized(): bool
     {
         return self::$wasInitialized;
     }
@@ -95,7 +97,7 @@ class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
     /**
      * @param string $class
      */
-    public function loadClass($class)
+    public function loadClass($class): void
     {
         $file = $this->findFile($class);
 
@@ -117,7 +119,7 @@ class AopComposerLoader extends \Go\Instrument\ClassLoading\AopComposerLoader
      * @param string $class
      * @return false|string
      */
-    public function findFile($class)
+    public function findFile(string $class)
     {
         static $isAllowedFilter = null;
         if (!$isAllowedFilter) {

@@ -30,13 +30,13 @@ class MemWeavingTransformer extends BaseSourceTransformer
     /**
      * @var AdviceMatcher
      */
-    protected $adviceMatcher;
+    protected AdviceMatcher $adviceMatcher;
     /**
      * Instance of aspect loader
      *
      * @var AspectLoader
      */
-    protected $aspectLoader;
+    protected AspectLoader $aspectLoader;
 
     /**
      * Constructs a weaving transformer
@@ -61,7 +61,7 @@ class MemWeavingTransformer extends BaseSourceTransformer
      * @param StreamMetaData $metadata Metadata for source
      * @return string See RESULT_XXX constants in the interface
      */
-    public function transform(StreamMetaData $metadata)
+    public function transform(StreamMetaData $metadata): string
     {
         $totalTransformations = 0;
         $parsedSource = new ReflectionFile($metadata->uri, $metadata->syntaxTree);

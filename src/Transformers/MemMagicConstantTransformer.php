@@ -1,8 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Rabbit\Aop\Transformers;
 
+use Go\Instrument\Transformer\MagicConstantTransformer;
 use Go\Instrument\Transformer\NodeFinderVisitor;
 use Go\Instrument\Transformer\StreamMetaData;
 use PhpParser\Node\Expr\MethodCall;
@@ -16,13 +18,13 @@ use PhpParser\NodeTraverser;
  * Class MemMagicConstantTransformer
  * @package Rabbit\Aop\Transformers
  */
-class MemMagicConstantTransformer extends \Go\Instrument\Transformer\MagicConstantTransformer
+class MemMagicConstantTransformer extends MagicConstantTransformer
 {
     /**
      * @param StreamMetaData $metadata
      * @return string
      */
-    public function transform(StreamMetaData $metadata)
+    public function transform(StreamMetaData $metadata): string
     {
         $this->replaceMagicDirFileConstants($metadata);
         $this->wrapReflectionGetFileName($metadata);
@@ -34,7 +36,7 @@ class MemMagicConstantTransformer extends \Go\Instrument\Transformer\MagicConsta
     /**
      * @param StreamMetaData $metadata
      */
-    private function replaceMagicDirFileConstants(StreamMetaData $metadata)
+    private function replaceMagicDirFileConstants(StreamMetaData $metadata): void
     {
         $magicConstFinder = new NodeFinderVisitor([Dir::class, File::class]);
         $traverser = new NodeTraverser();
@@ -56,7 +58,7 @@ class MemMagicConstantTransformer extends \Go\Instrument\Transformer\MagicConsta
     /**
      * @param StreamMetaData $metadata
      */
-    private function wrapReflectionGetFileName(StreamMetaData $metadata)
+    private function wrapReflectionGetFileName(StreamMetaData $metadata): void
     {
         $methodCallFinder = new NodeFinderVisitor([MethodCall::class]);
         $traverser = new NodeTraverser();

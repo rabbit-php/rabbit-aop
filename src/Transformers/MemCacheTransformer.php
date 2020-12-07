@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Rabbit\Aop\Transformers;
@@ -32,7 +33,7 @@ class MemCacheTransformer extends BaseSourceTransformer
      * @param StreamMetaData $metadata Metadata for source
      * @return string See RESULT_XXX constants in the interface
      */
-    public function transform(StreamMetaData $metadata)
+    public function transform(StreamMetaData $metadata): string
     {
         return $this->processTransformers($metadata);
     }

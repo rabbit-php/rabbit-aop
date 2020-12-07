@@ -76,7 +76,7 @@ class AopAspectKernel extends AspectKernel
      * @param array $options
      * @return array
      */
-    protected function normalizeOptions(array $options)
+    protected function normalizeOptions(array $options): array
     {
         $options = array_replace($this->getDefaultOptions(), $options);
 
@@ -92,7 +92,7 @@ class AopAspectKernel extends AspectKernel
     /**
      * @return array|CachingTransformer[]|SourceTransformer[]|MemCacheTransformer[]
      */
-    protected function registerTransformers()
+    protected function registerTransformers(): array
     {
         $filterInjector = new FilterInjectorTransformer($this, SourceTransformingLoader::getId());
         $magicTransformer = new MemMagicConstantTransformer($this);
@@ -124,7 +124,7 @@ class AopAspectKernel extends AspectKernel
     /**
      * @param AspectContainer $container
      */
-    protected function addKernelResourcesToContainer(AspectContainer $container)
+    protected function addKernelResourcesToContainer(AspectContainer $container): void
     {
         $trace =  debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
         $refClass = new \ReflectionObject($this);

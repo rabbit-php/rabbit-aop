@@ -1,18 +1,20 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Rabbit\Aop;
+
+use Go\Proxy\FunctionProxy as ProxyFunctionProxy;
 
 /**
  * Class FunctionProxy
  * @package Rabbit\Aop
  */
-class FunctionProxy extends \Go\Proxy\FunctionProxy
+class FunctionProxy extends ProxyFunctionProxy
 {
     public function __toString()
     {
-        $functionsCode = (
-            $this->namespace->getDocComment() . "\n" . // Doc-comment for file
+        $functionsCode = ($this->namespace->getDocComment() . "\n" . // Doc-comment for file
             'namespace ' . // 'namespace' keyword
             $this->namespace->getName() . // Name
             ";\n" . // End of namespace name

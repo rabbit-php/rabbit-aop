@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Rabbit\Aop;
@@ -36,7 +37,7 @@ class MemCachedAspectLoader extends AspectLoader
     /**
      * {@inheritdoc}
      */
-    public function load(Aspect $aspect)
+    public function load(Aspect $aspect): array
     {
         return $this->loader->load($aspect);
     }
@@ -44,7 +45,7 @@ class MemCachedAspectLoader extends AspectLoader
     /**
      * {@inheritdoc}
      */
-    public function registerLoaderExtension(AspectLoaderExtension $loader)
+    public function registerLoaderExtension(AspectLoaderExtension $loader): void
     {
         $this->loader->registerLoaderExtension($loader);
     }

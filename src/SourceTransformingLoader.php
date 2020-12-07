@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Rabbit\Aop;
@@ -80,7 +81,7 @@ class SourceTransformingLoader
      *
      * @return void
      */
-    public static function addTransformer(SourceTransformer $transformer):void
+    public static function addTransformer(SourceTransformer $transformer): void
     {
         self::$transformers[] = $transformer;
     }
@@ -92,7 +93,7 @@ class SourceTransformingLoader
      *
      * @return void
      */
-    public static function transformCode(?StreamMetaData $metadata)
+    public static function transformCode(?StreamMetaData $metadata): void
     {
         foreach (self::$transformers as $transformer) {
             $result = $transformer->transform($metadata);
