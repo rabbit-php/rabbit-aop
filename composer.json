@@ -11,7 +11,7 @@
   ],
   "require": {
     "php": ">=7.4.0",
-    "goaop/framework": "^2.3"
+    "goaop/framework": "dev-master"
   },
   "require-dev": {
     "swoole/ide-helper": "@dev",
