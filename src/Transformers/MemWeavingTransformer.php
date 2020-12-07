@@ -6,8 +6,6 @@ namespace Rabbit\Aop\Transformers;
 
 use Go\Aop\Aspect;
 use Go\Aop\Advisor;
-use Go\Proxy\ClassProxy;
-use Go\Proxy\TraitProxy;
 use Go\Core\AspectKernel;
 use Go\Core\AspectLoader;
 use Go\Core\AdviceMatcher;
@@ -20,6 +18,8 @@ use Go\ParserReflection\ReflectionMethod;
 use Go\Instrument\Transformer\StreamMetaData;
 use Go\ParserReflection\ReflectionFileNamespace;
 use Go\Instrument\Transformer\BaseSourceTransformer;
+use Go\Proxy\ClassProxyGenerator;
+use Go\Proxy\TraitProxyGenerator;
 
 /**
  * Class MemWeavingTransformer
@@ -27,16 +27,9 @@ use Go\Instrument\Transformer\BaseSourceTransformer;
  */
 class MemWeavingTransformer extends BaseSourceTransformer
 {
-    /**
-     * @var AdviceMatcher
-     */
     protected AdviceMatcher $adviceMatcher;
-    /**
-     * Instance of aspect loader
-     *
-     * @var AspectLoader
-     */
     protected AspectLoader $aspectLoader;
+    protected $useParameterWidening = false;
 
     /**
      * Constructs a weaving transformer
@@ -64,7 +57,7 @@ class MemWeavingTransformer extends BaseSourceTransformer
     public function transform(StreamMetaData $metadata): string
     {
         $totalTransformations = 0;
-        $parsedSource = new ReflectionFile($metadata->uri, $metadata->syntaxTree);
+        $parsedSource         = new ReflectionFile($metadata->uri, $metadata->syntaxTree);
 
         // Check if we have some new aspects that weren't loaded yet
         $unloadedAspects = $this->aspectLoader->getUnloadedAspects();
@@ -79,14 +72,19 @@ class MemWeavingTransformer extends BaseSourceTransformer
             $classes = $namespace->getClasses();
             foreach ($classes as $class) {
                 // Skip interfaces and aspects
-                if ($class->isInterface() || in_array(Aspect::class, $class->getInterfaceNames())) {
+                if ($class->isInterface() || in_array(Aspect::class, $class->getInterfaceNames(), true)) {
                     continue;
                 }
-                $wasClassProcessed = $this->processSingleClass($advisors, $metadata, $class);
-                $totalTransformations += (int)$wasClassProcessed;
+                $wasClassProcessed = $this->processSingleClass(
+                    $advisors,
+                    $metadata,
+                    $class,
+                    $parsedSource->isStrictMode()
+                );
+                $totalTransformations += (int) $wasClassProcessed;
             }
             $wasFunctionsProcessed = $this->processFunctions($advisors, $metadata, $namespace);
-            $totalTransformations += (int)$wasFunctionsProcessed;
+            $totalTransformations += (int) $wasFunctionsProcessed;
         }
 
         $result = ($totalTransformations > 0) ? self::RESULT_TRANSFORMED : self::RESULT_ABSTAIN;
@@ -115,7 +113,7 @@ class MemWeavingTransformer extends BaseSourceTransformer
      *
      * @return bool True if was class processed, false otherwise
      */
-    private function processSingleClass(array $advisors, StreamMetaData $metadata, ReflectionClass $class): bool
+    private function processSingleClass(array $advisors, StreamMetaData $metadata, ReflectionClass $class, bool $useStrictMode): bool
     {
         $advices = $this->adviceMatcher->getAdvicesForClass($class, $advisors);
 
@@ -124,29 +122,38 @@ class MemWeavingTransformer extends BaseSourceTransformer
             return false;
         }
 
-        // Sort advices in advance to keep the correct order in cache
-        foreach ($advices as &$typeAdvices) {
-            foreach ($typeAdvices as &$joinpointAdvices) {
-                if (is_array($joinpointAdvices)) {
-                    $joinpointAdvices = AbstractJoinpoint::sortAdvices($joinpointAdvices);
-                }
-            }
-        }
+        // Sort advices in advance to keep the correct order in cache, and leave only keys for the cache
+        $advices = AbstractJoinpoint::flatAndSortAdvices($advices);
 
         // Prepare new class name
         $newClassName = $class->getShortName() . AspectContainer::AOP_PROXIED_SUFFIX;
 
         // Replace original class name with new
         $this->adjustOriginalClass($class, $advices, $metadata, $newClassName);
+        $newParentName = $class->getNamespaceName() . '\\' . $newClassName;
 
         // Prepare child Aop proxy
-        $child = $class->isTrait()
-            ? new TraitProxy($class, $advices)
-            : new ClassProxy($class, $advices);
+        $childProxyGenerator = $class->isTrait()
+            ? new TraitProxyGenerator($class, $newParentName, $advices, $this->useParameterWidening)
+            : new ClassProxyGenerator($class, $newParentName, $advices, $this->useParameterWidening);
 
-        // Set new parent name instead of original
-        $child->setParentName($newClassName);
-        $contentToInclude = $this->saveProxyToCache($class, $child);
+        $refNamespace = new ReflectionFileNamespace($class->getFileName(), $class->getNamespaceName());
+        foreach ($refNamespace->getNamespaceAliases() as $fqdn => $alias) {
+            // Either we have a string or Identifier node
+            if ($alias !== null) {
+                $childProxyGenerator->addUse($fqdn, (string) $alias);
+            } else {
+                $childProxyGenerator->addUse($fqdn);
+            }
+        }
+
+        $childCode = $childProxyGenerator->generate();
+
+        if ($useStrictMode) {
+            $childCode = 'declare(strict_types=1);' . PHP_EOL . $childCode;
+        }
+
+        $contentToInclude = '<?php' . PHP_EOL . $childCode;
 
         // Get last token for this class
         $lastClassToken = $class->getNode()->getAttribute('endTokenPos');
@@ -212,32 +219,6 @@ class MemWeavingTransformer extends BaseSourceTransformer
                 ++$position;
             } while (true);
         }
-    }
-
-    /**
-     * Save AOP proxy to the separate file anr returns the php source code for inclusion
-     *
-     * @param ReflectionClass $class Original class reflection
-     * @param ClassProxy $child
-     *
-     * @return string
-     */
-    private function saveProxyToCache(ReflectionClass $class, ClassProxy $child): string
-    {
-        $body = '';
-        $namespace = $class->getNamespaceName();
-        if (!empty($namespace)) {
-            $body .= "namespace {$namespace};" . PHP_EOL . PHP_EOL;
-        }
-
-        $refNamespace = new ReflectionFileNamespace($class->getFileName(), $namespace);
-        foreach ($refNamespace->getNamespaceAliases() as $fqdn => $alias) {
-            $aliasSuffix = ($alias !== null) ? " as {$alias}" : '';
-            $body .= "use {$fqdn}{$aliasSuffix};" . PHP_EOL;
-        }
-
-        $body .= (string)$child;
-        return $body;
     }
 
     /**

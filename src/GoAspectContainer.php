@@ -68,7 +68,6 @@ class GoAspectContainer extends CoreGoAspectContainer
 
         $this->share('aspect.advice_matcher', function (Container $container) {
             return new AdviceMatcher(
-                $container->get('aspect.loader'),
                 $container->get('kernel.interceptFunctions')
             );
         });
