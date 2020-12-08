@@ -57,7 +57,7 @@ class MemWeavingTransformer extends BaseSourceTransformer
     public function transform(StreamMetaData $metadata): string
     {
         $totalTransformations = 0;
-        $parsedSource         = new ReflectionFile($metadata->uri, $metadata->syntaxTree);
+        $parsedSource = new ReflectionFile($metadata->uri, $metadata->syntaxTree);
 
         // Check if we have some new aspects that weren't loaded yet
         $unloadedAspects = $this->aspectLoader->getUnloadedAspects();
@@ -149,16 +149,14 @@ class MemWeavingTransformer extends BaseSourceTransformer
 
         $childCode = $childProxyGenerator->generate();
 
-        if ($useStrictMode) {
-            $childCode = 'declare(strict_types=1);' . PHP_EOL . $childCode;
-        }
-
-        $contentToInclude = '<?php' . PHP_EOL . $childCode;
+        // if ($useStrictMode) {
+        //     $childCode = 'declare(strict_types=1);' . PHP_EOL . $childCode;
+        // }
 
         // Get last token for this class
         $lastClassToken = $class->getNode()->getAttribute('endTokenPos');
 
-        $metadata->tokenStream[$lastClassToken][1] .= PHP_EOL . $contentToInclude;
+        $metadata->tokenStream[$lastClassToken][1] .= PHP_EOL . $childCode;
 
         return true;
     }

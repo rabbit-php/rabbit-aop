@@ -57,18 +57,17 @@ class Aop
                                     if (($fp = fopen($fileName, 'r')) === false) {
                                         throw new InvalidArgumentException("Unable to open file: {$fileName}");
                                     }
-                                    $context = fread($fp, filesize($fileName));
-                                    $metadata = new StreamMetaData($fp, $context);
+                                    $metadata = new StreamMetaData($fp, $contents);
                                     fclose($fp);
                                     SourceTransformingLoader::transformCode($metadata);
-                                    $context = $metadata->source;
-                                    $aopClass = $this->getClassByString($context);
+                                    $contents = $metadata->source;
+                                    $aopClass = $this->getClassByString($contents);
                                     if (strpos($aopClass, '__AopProxied') !== false) {
                                         $dir = $cacheDir . '/' . $file->getPathname();
                                         self::createDirectory(dirname($dir), 0777);
                                         $len = file_put_contents(
                                             $dir,
-                                            $context
+                                            $contents
                                         );
                                         if (!$len) {
                                             new InvalidArgumentException("Unable to write file: {$dir}");
@@ -112,7 +111,7 @@ class Aop
             if ($getting_namespace === true) {
 
                 //If the token is a string or the namespace separator...
-                if (is_array($token) && in_array($token[0], [T_STRING, T_NS_SEPARATOR])) {
+                if (is_array($token) && in_array($token[0], [T_STRING, T_NS_SEPARATOR, 314])) {
 
                     //Append the token's value to the name of the namespace
                     $namespace .= $token[1];
