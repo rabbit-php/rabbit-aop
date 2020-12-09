@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Rabbit\Aop;
 
 use Exception;
+use Go\Instrument\Transformer\StreamMetaData;
 use InvalidArgumentException;
 use Rabbit\Base\Helper\FileHelper;
 
@@ -64,7 +65,7 @@ class Aop
                                     $aopClass = $this->getClassByString($contents);
                                     if (strpos($aopClass, '__AopProxied') !== false) {
                                         $dir = $cacheDir . '/' . $file->getPathname();
-                                        self::createDirectory(dirname($dir), 0777);
+                                        FileHelper::createDirectory(dirname($dir), 0777);
                                         $len = file_put_contents(
                                             $dir,
                                             $contents
@@ -141,42 +142,5 @@ class Aop
 
         //Build the fully-qualified class name and return it
         return $namespace ? $namespace . '\\' . $class : $class;
-    }
-
-    /**
-     * @param string $path
-     * @param int $mode
-     * @param bool $recursive
-     * @return bool
-     * @throws Exception
-     */
-    public static function createDirectory(string $path, int $mode = 0775, bool $recursive = true): bool
-    {
-        if (is_dir($path)) {
-            return true;
-        }
-        $parentDir = dirname($path);
-        // recurse if parent dir does not exist and we are not at the root of the file system.
-        if ($recursive && !is_dir($parentDir) && $parentDir !== $path) {
-            static::createDirectory($parentDir, $mode, true);
-        }
-        try {
-            if (!mkdir($path, $mode)) {
-                return false;
-            }
-        } catch (Exception $e) {
-            if (!is_dir($path)) {
-                throw new Exception("Failed to create directory \"$path\": " . $e->getMessage(), $e->getCode(), $e);
-            }
-        }
-        try {
-            return chmod($path, $mode);
-        } catch (Exception $e) {
-            throw new Exception(
-                "Failed to change permissions for directory \"$path\": " . $e->getMessage(),
-                $e->getCode(),
-                $e
-            );
-        }
     }
 }
