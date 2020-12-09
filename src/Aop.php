@@ -49,16 +49,16 @@ class Aop
                     if ($item->getIncludePath()) {
                         foreach ($item->getEnumerator()->enumerate() as $file) {
                             $fileName = $file->getPathname();
-                            $contents = file_get_contents($fileName);
+                            if (($fp = fopen($fileName, 'r')) === false) {
+                                throw new InvalidArgumentException("Unable to open file: {$fileName}");
+                            }
+                            $contents = fread($fp, filesize($fileName));
+                            $metadata = new StreamMetaData($fp, $contents);
+                            fclose($fp);
                             $class = $this->getClassByString($contents);
                             if (!empty($class)) {
                                 $aopFile = $item->findFile($class);
                                 if ($aopFile !== false && strpos($aopFile, 'php://') === 0) {
-                                    if (($fp = fopen($fileName, 'r')) === false) {
-                                        throw new InvalidArgumentException("Unable to open file: {$fileName}");
-                                    }
-                                    $metadata = new StreamMetaData($fp, $contents);
-                                    fclose($fp);
                                     SourceTransformingLoader::transformCode($metadata);
                                     $contents = $metadata->source;
                                     $aopClass = $this->getClassByString($contents);
