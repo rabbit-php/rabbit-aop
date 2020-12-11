@@ -20,6 +20,9 @@
   "autoload": {
     "psr-4": {
       "Rabbit\\Aop\\": "src/"
-    }
+    },
+    "classmap": [
+      "src/Wrapper"
+    ]
   }
 }
