@@ -28,10 +28,10 @@ final class AfterReturnInterceptor extends AbstractInterceptor implements Advice
     public function invoke(Joinpoint $joinpoint)
     {
         try {
-            return $joinpoint->result = $joinpoint->proceed();
+            $result = $joinpoint->proceed();
+            return $result;
         } finally {
-            ($this->adviceMethod)($joinpoint);
-            return $joinpoint->result;
+            return ($this->adviceMethod)($joinpoint, $result);
         }
     }
 }
