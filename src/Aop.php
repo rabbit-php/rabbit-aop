@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Rabbit\Aop;
 
 use Exception;
-use Go\Instrument\Transformer\StreamMetaData;
+use Go\Core\AspectContainer;
 use InvalidArgumentException;
 use Rabbit\Base\Helper\FileHelper;
 
@@ -63,7 +63,7 @@ class Aop
                                     SourceTransformingLoader::transformCode($metadata);
                                     $contents = $metadata->source;
                                     $aopClass = $this->getClassByString($contents);
-                                    if (strpos($aopClass, '__AopProxied') !== false) {
+                                    if (strpos($aopClass, AspectContainer::AOP_PROXIED_SUFFIX) !== false) {
                                         $dir = $cacheDir . '/' . $file->getPathname();
                                         FileHelper::createDirectory(dirname($dir), 0777);
                                         $len = file_put_contents(

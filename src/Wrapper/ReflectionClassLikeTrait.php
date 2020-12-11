@@ -533,7 +533,7 @@ trait ReflectionClassLikeTrait
     /**
      * @inheritDoc
      */
-    public function getReflectionConstants()
+    public function getReflectionConstants(?int $filter = null)
     {
         if (!isset($this->classConstants)) {
             $directClassConstants = ReflectionClassConstant::collectFromClassNode($this->classLikeNode, $this->getName());
