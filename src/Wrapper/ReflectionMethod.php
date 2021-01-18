@@ -74,7 +74,7 @@ class ReflectionMethod extends BaseReflectionMethod
     /**
      * Emulating original behaviour of reflection
      */
-    public function ___debugInfo()
+    public function __debugInfo(): array
     {
         return [
             'name'  => $this->getClassMethodNode()->name->toString(),
@@ -328,7 +328,7 @@ class ReflectionMethod extends BaseReflectionMethod
      *
      * @return void
      */
-    protected function __initialize()
+    protected function __initialize(): void
     {
         parent::__construct($this->className, $this->getName());
     }

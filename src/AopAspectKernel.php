@@ -38,7 +38,7 @@ class AopAspectKernel extends AspectKernel
         return $this;
     }
 
-    public function init(array $options = [])
+    public function init(array $options = []): void
     {
         if ($this->wasInitialized) {
             return;

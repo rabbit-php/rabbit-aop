@@ -8,6 +8,7 @@ use Composer\Autoload\ClassLoader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Go\Core\AspectContainer;
 use Go\Instrument\ClassLoading\AopComposerLoader as ClassLoadingAopComposerLoader;
+use Go\Instrument\FileSystem\Enumerator;
 use Go\Instrument\PathResolver;
 use Rabbit\Aop\Transformers\FilterInjectorTransformer;
 

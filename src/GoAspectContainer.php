@@ -31,16 +31,16 @@ class GoAspectContainer extends CoreGoAspectContainer
     {
         // Register all services in the container
         $this->share('aspect.loader', function (Container $container) {
-            $aspectLoader = new AspectLoader(
-                $container,
-                $container->get('aspect.annotation.reader')
-            );
+
+            $reader = $container->get('aspect.annotation.reader');
+            $aspectLoader = new AspectLoader($container);
             $lexer = $container->get('aspect.pointcut.lexer');
             $parser = $container->get('aspect.pointcut.parser');
 
+
             // Register general aspect loader extension
-            $aspectLoader->registerLoaderExtension(new GeneralAspectLoaderExtension($lexer, $parser));
-            $aspectLoader->registerLoaderExtension(new IntroductionAspectExtension($lexer, $parser));
+            $aspectLoader->registerLoaderExtension(new GeneralAspectLoaderExtension($lexer, $parser, $reader));
+            $aspectLoader->registerLoaderExtension(new IntroductionAspectExtension($lexer, $parser, $reader));
 
             return $aspectLoader;
         });
@@ -88,7 +88,7 @@ class GoAspectContainer extends CoreGoAspectContainer
             return new CachedReader(
                 new AnnotationReader(),
                 $container->get('aspect.annotation.cache'),
-                $options['debug']
+                $options['debug'] ?? false
             );
         });
 

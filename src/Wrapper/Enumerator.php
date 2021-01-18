@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Rabbit\Aop;
+namespace Go\Instrument\FileSystem;
 
 use ArrayIterator;
 use Closure;

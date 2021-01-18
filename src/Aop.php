@@ -6,6 +6,7 @@ namespace Rabbit\Aop;
 
 use Exception;
 use Go\Core\AspectContainer;
+use Go\Instrument\Transformer\StreamMetaData;
 use InvalidArgumentException;
 use Rabbit\Base\Helper\FileHelper;
 

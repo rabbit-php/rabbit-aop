@@ -1012,5 +1012,5 @@ trait ReflectionClassLikeTrait
      * @return ReflectionClass
      *     The apropriate reflection object.
      */
-    abstract protected function createReflectionForClass($className);
+    abstract protected function createReflectionForClass(string $className);
 }
