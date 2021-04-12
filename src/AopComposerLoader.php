@@ -112,7 +112,9 @@ class AopComposerLoader extends ClassLoadingAopComposerLoader
                     $file = $aopFile;
                 }
             }
-            include_once $file;
+            \Co::disableScheduler();
+            include $file;
+            \Co::enableScheduler();
         }
     }
 
